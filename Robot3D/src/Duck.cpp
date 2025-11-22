@@ -347,7 +347,7 @@ void drawDuck()
 {
 	glPushMatrix(); // copy M = IV and push onto the stack
 
-	//drawBooth();
+	drawBooth();
 
 	glPopMatrix();
 }
