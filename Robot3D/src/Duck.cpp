@@ -53,8 +53,10 @@ typedef struct Duck {
 	float angle2 = 0; // rotating for flipping when shot
 } Duck;
 
+const int flockSize = 6;
+
 // array of ducks
-Duck ducks[5];
+Duck ducks[flockSize];
 
 float cameraX = 0;
 float cameraY = 6.0;
@@ -182,14 +184,14 @@ int main(int argc, char** argv)
 	glutCreateWindow("3D Hierarchical Example");
 
 	// Initalize array of ducks
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < flockSize; i++) {
 		ducks[i].x = -7.0f + i * 3.0f; // spread ducks out along x-axis
 		ducks[i].y = 0.0f;
 		if (i % 2 == 0) {
-			ducks[i].angle = 180.0f;
+			ducks[i].angle = 0.0f;
 		}
 		else {
-			ducks[i].angle = 0.0f;
+			ducks[i].angle = 180.0f;
 		}
 		//ducks[i].angle = 0.0f;
 		ducks[i].angle2 = 0.0f;
@@ -285,7 +287,7 @@ void display(void)
 	drawDuck();
 
 	// draw the ducks
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < flockSize; i++) {
 		glPushMatrix();
 		glTranslatef(ducks[i].x, ducks[i].y, 0);
 		glTranslatef(0, -2, 0);
@@ -522,7 +524,7 @@ void animationHandler(int param)
 {
 
 	// animate each duck in array
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < flockSize; i++) {
 		if ((ducks[i].angle == 0.0f || ducks[i].angle >= 360.0f) && ducks[i].x < 7.0f) {
 			ducks[i].angle = 0.0f;
 			ducks[i].y = amplitude * sin(frequency * ducks[i].x);
