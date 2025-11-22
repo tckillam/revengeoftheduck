@@ -46,6 +46,16 @@ float height = 2.0f;      // Height of the wall
 float duckPosX = -7.0f;
 float duckPosY = 0;
 
+typedef struct Duck {
+	float x; // duck's pos x
+	float y; // duck's pos y
+	float angle = 0; // for rotating up and down
+	float angle2 = 0; // rotating for flipping when shot
+} Duck;
+
+// array of ducks
+Duck ducks[5];
+
 float cameraX = 0;
 float cameraY = 6.0;
 float cameraZ = 22.0;
@@ -171,6 +181,20 @@ int main(int argc, char** argv)
 	glutInitWindowPosition(200, 30);
 	glutCreateWindow("3D Hierarchical Example");
 
+	// Initalize array of ducks
+	for (int i = 0; i < 5; i++) {
+		ducks[i].x = -7.0f + i * 3.0f; // spread ducks out along x-axis
+		ducks[i].y = 0.0f;
+		if (i % 2 == 0) {
+			ducks[i].angle = 180.0f;
+		}
+		else {
+			ducks[i].angle = 0.0f;
+		}
+		//ducks[i].angle = 0.0f;
+		ducks[i].angle2 = 0.0f;
+	}
+
 	// Initialize GL
 	initOpenGL(vWidth, vHeight);
 
@@ -259,11 +283,23 @@ void display(void)
 	// ModelView matrix is set to IV, where I is identity matrix
 	// M = IV
 	drawDuck();
-	glPushMatrix();
-	glTranslatef(duckPosX, duckPosY, 0);
-	glTranslatef(0, -2, 0);
-	glRotatef(duckAngle, 0.0, 0.0, -1.0);
-	glTranslatef(0, 2, 0);
+
+	// draw the ducks
+	for (int i = 0; i < 5; i++) {
+		glPushMatrix();
+		glTranslatef(ducks[i].x, ducks[i].y, 0);
+		glTranslatef(0, -2, 0);
+		glRotatef(ducks[i].angle, 0.0, 0.0, -1.0);
+		glTranslatef(0, 2, 0);
+		drawBody();
+		glPopMatrix();
+	}
+
+	//glPushMatrix();
+	//glTranslatef(duckPosX, duckPosY, 0);
+	//glTranslatef(0, -2, 0);
+	//glRotatef(duckAngle, 0.0, 0.0, -1.0);
+	//glTranslatef(0, 2, 0);
 
 
 	/*
@@ -275,18 +311,18 @@ void display(void)
 	drawBody();
 	glPopMatrix();
     */
-	drawBody(); // this drawBody() got moved from above because it usually sits in the flipper
-	glPopMatrix();
+	//drawBody(); // this drawBody() got moved from above because it usually sits in the flipper
+	//glPopMatrix();
 
 
 	// second duck
-	glPushMatrix();
-	glTranslatef(duckPosX + 4.5, duckPosY, 0);
+	/*glPushMatrix();
+	glTranslatef(-7, duckPosY, 0);
 	glTranslatef(0, -2, 0);
-	glRotatef(duckAngle, 0.0, 0.0, -1.0);
+	glRotatef(180, 0.0, 0.0, -1.0);
 	glTranslatef(0, 2, 0);
 	drawBody(); 
-	glPopMatrix();
+	glPopMatrix();*/
 
 	glutTimerFunc(10, animationHandler, 0);
 
@@ -309,7 +345,7 @@ void drawDuck()
 {
 	glPushMatrix(); // copy M = IV and push onto the stack
 
-	drawBooth();
+	//drawBooth();
 
 	glPopMatrix();
 }
@@ -484,29 +520,56 @@ void keyboard(unsigned char key, int x, int y)
 
 void animationHandler(int param)
 {
-	// animate the duck left to right in a sine wave
-	if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f) {
-		duckAngle = 0.0f;
-		duckPosY = amplitude * sin(frequency * duckPosX);
-		duckPosX += 0.00004;
+
+	// animate each duck in array
+	for (int i = 0; i < 5; i++) {
+		if ((ducks[i].angle == 0.0f || ducks[i].angle >= 360.0f) && ducks[i].x < 7.0f) {
+			ducks[i].angle = 0.0f;
+			ducks[i].y = amplitude * sin(frequency * ducks[i].x);
+			ducks[i].x += 0.00004;
+		}
+		// rotate duck down
+		else if (ducks[i].x >= 7.0f && ducks[i].angle < 180.0f) {
+			ducks[i].angle += 0.0009;
+			ducks[i].y = 0;
+		}
+		// animate the duck right to left
+		else if (ducks[i].angle >= 180.0f && ducks[i].x > -7.0f) {
+			ducks[i].angle = 180.0f;
+			ducks[i].angle2 = 0.0f;
+			ducks[i].x -= 0.00004;
+			ducks[i].y = 0;
+		}
+		// rotate the duck back up
+		else if (ducks[i].x <= -7.0f && ducks[i].angle < 360.0f) {
+			ducks[i].angle += 0.0009;
+			ducks[i].y = 0;
+		}
 	}
-	// rotate duck down
-	else if (duckPosX >= 7.0f && duckAngle < 180.0f) {
-		duckAngle += 0.0005;
-		duckPosY = 0;
-	}
-	// animate the duck right to left
-	else if (duckAngle >= 180.0f && duckPosX > -7.0f) {
-		duckAngle = 180.0f;
-		duckAngle2 = 0.0f;
-		duckPosX -= 0.0009;
-		duckPosY = 0;
-	}
-	// rotate the duck back up
-	else if (duckPosX <= -7.0f && duckAngle < 360.0f) {
-		duckAngle += 0.0005;
-		duckPosY = 0;
-	}
+
+	//// animate the duck left to right in a sine wave
+	//if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f) {
+	//	duckAngle = 0.0f;
+	//	duckPosY = amplitude * sin(frequency * duckPosX);
+	//	duckPosX += 0.00004;
+	//}
+	//// rotate duck down
+	//else if (duckPosX >= 7.0f && duckAngle < 180.0f) {
+	//	duckAngle += 0.0005;
+	//	duckPosY = 0;
+	//}
+	//// animate the duck right to left
+	//else if (duckAngle >= 180.0f && duckPosX > -7.0f) {
+	//	duckAngle = 180.0f;
+	//	duckAngle2 = 0.0f;
+	//	duckPosX -= 0.0009;
+	//	duckPosY = 0;
+	//}
+	//// rotate the duck back up
+	//else if (duckPosX <= -7.0f && duckAngle < 360.0f) {
+	//	duckAngle += 0.0005;
+	//	duckPosY = 0;
+	//}
 	glutPostRedisplay();
 	glutTimerFunc(10, animationHandler, 0);
 }
