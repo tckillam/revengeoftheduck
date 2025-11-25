@@ -727,20 +727,20 @@ float mY = vHeight / 2;
 // Mouse motion callback - use only if you want to 
 void mouseMotionHandler(int xMouse, int yMouse)
 {
-	if (currentButton == GLUT_LEFT_BUTTON)
-	{
+	//if (currentButton == GLUT_LEFT_BUTTON)
+	//{
 		//
-		if (xMouse < mX && gunPosX < 20.0) {
+		if (xMouse < mX && gunPosX < 13.0) {
 			gunPosX += 0.25;
 			mX = xMouse;
 		}
-		if (xMouse > mX && gunPosX > -20.0) {
+		if (xMouse > mX && gunPosX > -13.0) {
 			gunPosX -= 0.25;
 			mX = xMouse;
 		}
-	}
-	if (currentButton == GLUT_RIGHT_BUTTON)
-	{
+	//}
+	//if (currentButton == GLUT_RIGHT_BUTTON)
+	//{
 		if (yMouse < mY && gunPosY < 6.0) {
 			gunPosY += 0.1;
 			mY = yMouse;
@@ -751,7 +751,7 @@ void mouseMotionHandler(int xMouse, int yMouse)
 			mY = yMouse;
 		}
 		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
-	}
+	//}
 	//printf("yMouse: %f\n", yMouse);
 
 	glutPostRedisplay();   // Trigger a window redisplay
