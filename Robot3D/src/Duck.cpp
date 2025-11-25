@@ -32,7 +32,8 @@ float beakLength = 0.7f * headRadius;
 float tailRadius = 0.45f * bodyRadius;
 float tailLength = 0.5f * bodyRadius;
 float boothLength = 20;
-float gunLength = 5;	
+float gunLength = 5;
+float bulletRadius = gunLength * 0.1f;
 
 // Control duck body rotation on base
 float duckAngle = 0;
@@ -70,6 +71,8 @@ float cubeAngle = 0.0;
 float gunPosX = 0.0;
 float gunPosY = 0.0;
 
+float bulletPosZ = 0.0;
+
 // Lighting/shading and material properties for duck - upcoming lecture - just copy for now
 // duck RGBA material properties (NOTE: we will learn about this later in the semester)
 GLfloat duckBody_mat_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
@@ -77,11 +80,10 @@ GLfloat duckBody_mat_specular[] = { 0.9f,0.9f,0.9f,1.0f };
 GLfloat duckBody_mat_diffuse[] = { 0.1f,0.35f,0.1f,1.0f };
 GLfloat duckBody_mat_shininess[] = { 150.0F };
 
-
-GLfloat duckArm_mat_ambient[] = { 0.0215f, 0.1745f, 0.0215f, 0.55f };
-GLfloat duckArm_mat_diffuse[] = { 0.5f,0.0f,0.0f,1.0f };
-GLfloat duckArm_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
-GLfloat duckArm_mat_shininess[] = { 32.0F };
+GLfloat bullet_mat_ambient[] = { 0.0215f, 0.1745f, 0.0215f, 0.55f };
+GLfloat bullet_mat_diffuse[] = { 0.5f,0.0f,0.0f,1.0f };
+GLfloat bullet_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
+GLfloat bullet_mat_shininess[] = { 32.0F };
 
 GLfloat gun_mat_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
 GLfloat gun_mat_diffuse[] = { 0.4f, 0.4f, 0.4f, 1.0f };
@@ -124,10 +126,12 @@ void keyboard(unsigned char key, int x, int y);
 void functionKeys(int key, int x, int y);
 void animationHandler(int param);
 void animationDuckFlip(int param);
+void shootingDuck(int param);
 void drawDuck();
 void drawBody();
 void drawBooth();
 void drawGun();
+void drawBullet();
 void drawWaterWave();
 
 // this was chatgpt as we were supposed to use for requirement 8
@@ -330,9 +334,16 @@ void display(void)
 	glRotatef(gunPosX, 0.0, 1.0, 0.0);
 	glTranslatef(0.0, 0, -20);
 	drawGun();
-	glPopMatrix();
+	
+		glPushMatrix();
+		glTranslatef(0.0, 0.0, bulletPosZ);
+		drawBullet();
+		glPopMatrix();
 
+	glPopMatrix();
+	//drawBullet();
 	glutTimerFunc(10, animationHandler, 0);
+	shootingDuck(0);
 
 	// draw water wave
 	glPushMatrix();
@@ -423,23 +434,23 @@ void drawBody()
 	glPopMatrix();
 }
 
-void drawHead()
+void drawBullet()
 {
 	// Set duck material properties per body part. Can have seperate material properties for each part
-	glMaterialfv(GL_FRONT, GL_AMBIENT, duckBody_mat_ambient);
-	glMaterialfv(GL_FRONT, GL_SPECULAR, duckBody_mat_specular);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, duckBody_mat_diffuse);
-	glMaterialfv(GL_FRONT, GL_SHININESS, duckBody_mat_shininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, bullet_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, bullet_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, bullet_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, bullet_mat_shininess);
 
 	glPushMatrix();
 	// Position head with respect to its parent part (the body)
-	glTranslatef(2, 0.5 * bodyRadius + 0.5 * headRadius, 0); // this will be done last
+	//glTranslatef(2, 0.5 * bodyRadius + 0.5 * headRadius, 0); // this will be done last
 
 	// "Build" Head (i.e. scale it and draw it)
-	glPushMatrix();
-	glScalef(headRadius, headRadius, headRadius);
-	glutSolidSphere(1.0, 20, 20);
-	glPopMatrix();
+	//glPushMatrix();
+	//glScalef(headRadius, headRadius, headRadius);
+	glutSolidSphere(bulletRadius, 20, 20);
+	//glPopMatrix();
 
 	glPopMatrix();
 }
@@ -566,11 +577,9 @@ void keyboard(unsigned char key, int x, int y)
 	case 'F':
 		duckAngle2 += 2.0;
 		break;
-	case 'u':
-		duckAngle2 += 2.0;
-		break;
-	case 'd':
-		duckAngle2 += 2.0;
+	case 'a':
+		bulletPosZ -= 1.0;
+		printf("bulletPosZ: %f\n\n", bulletPosZ);
 		break;
 	}
 	glutPostRedisplay();  // Trigger a window redisplay
@@ -644,6 +653,15 @@ void animationDuckFlip(int param)
 		duckAngle2 = 90.0f;
 	}
 	glutPostRedisplay();
+}
+
+void shootingDuck(int param)
+{
+	if (bulletPosZ < -20) {
+		bulletPosZ = 0.0;
+		//glutTimerFunc(35, animationDuckFlip, 0);
+	}
+	//glutPostRedisplay();
 }
 
 // Callback, handles input from the keyboard, function and arrow keys
@@ -750,7 +768,7 @@ void mouseMotionHandler(int xMouse, int yMouse)
 			gunPosY -= 0.1;
 			mY = yMouse;
 		}
-		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
+		//printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
 	//}
 	//printf("yMouse: %f\n", yMouse);
 
