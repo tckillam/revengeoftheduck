@@ -66,6 +66,10 @@ float cameraZ = 22.0;
 // Spin Cube Mesh
 float cubeAngle = 0.0;
 
+// Animation control for ze gun
+float gunPosX = 0.0;
+float gunPosY = 0.0;
+
 // Lighting/shading and material properties for duck - upcoming lecture - just copy for now
 // duck RGBA material properties (NOTE: we will learn about this later in the semester)
 GLfloat duckBody_mat_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
@@ -500,7 +504,7 @@ void drawGun()
 	gluQuadricDrawStyle(myNozzle, GLU_FILL);
 
 	glPushMatrix();
-	glTranslatef(0, 0, 13); // this will be done last
+	glTranslatef(gunPosX, gunPosY, 15); // this will be done last
 	glRotatef(0.0, 0.0, 1.0, 0.0);
 	
 	// the main gun part thingy
@@ -562,6 +566,12 @@ void keyboard(unsigned char key, int x, int y)
 		glutTimerFunc(10, animationDuckFlip, 0);
 		break;
 	case 'F':
+		duckAngle2 += 2.0;
+		break;
+	case 'u':
+		duckAngle2 += 2.0;
+		break;
+	case 'd':
 		duckAngle2 += 2.0;
 		break;
 	}
@@ -682,6 +692,38 @@ void mouse(int button, int state, int x, int y)
 	glutPostRedisplay();   // Trigger a window redisplay
 }
 
+//float mX = vWidth / 2;
+//float mY = vHeight / 2;
+//// Mouse motion callback - use only if you want to 
+//void mouseMotionHandler(int xMouse, int yMouse)
+//{
+//	if (currentButton == GLUT_LEFT_BUTTON)
+//	{
+//		//
+//		if (xMouse > mX && cameraX < 10.0) {
+//			cameraX += 0.5;
+//			mX = xMouse;
+//		}
+//		if (xMouse < mX && cameraX > -10.0) {
+//			cameraX -= 0.5;
+//			mX = xMouse;
+//		}
+//	}
+//	if (currentButton == GLUT_RIGHT_BUTTON)
+//	{
+//		if (yMouse > mY && cameraZ < 40.0) {
+//			cameraZ += 0.5;
+//			mY = yMouse;
+//		}
+//		if (yMouse < mY && cameraZ > 10.0) {
+//			cameraZ -= 0.5;
+//			mY = yMouse;
+//		}
+//	}
+//
+//	glutPostRedisplay();   // Trigger a window redisplay
+//}
+
 float mX = vWidth / 2;
 float mY = vHeight / 2;
 // Mouse motion callback - use only if you want to 
@@ -690,26 +732,29 @@ void mouseMotionHandler(int xMouse, int yMouse)
 	if (currentButton == GLUT_LEFT_BUTTON)
 	{
 		//
-		if (xMouse > mX && cameraX < 10.0) {
-			cameraX += 0.5;
+		if (xMouse > mX && gunPosX < 5.0) {
+			gunPosX += 0.1;
 			mX = xMouse;
 		}
-		if (xMouse < mX && cameraX > -10.0) {
-			cameraX -= 0.5;
+		if (xMouse < mX && gunPosX > -5.0) {
+			gunPosX -= 0.1;
 			mX = xMouse;
 		}
 	}
 	if (currentButton == GLUT_RIGHT_BUTTON)
 	{
-		if (yMouse > mY && cameraZ < 40.0) {
-			cameraZ += 0.5;
+		if (yMouse < mY && gunPosY < 6.0) {
+			gunPosY += 0.1;
+			mY = yMouse;
+			//printf("gunPosY: %f\n", gunPosY);
+		}
+		if (yMouse > mY && gunPosY > -2.0) {
+			gunPosY -= 0.1;
 			mY = yMouse;
 		}
-		if (yMouse < mY && cameraZ > 10.0) {
-			cameraZ -= 0.5;
-			mY = yMouse;
-		}
+		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
 	}
+	//printf("yMouse: %f\n", yMouse);
 
 	glutPostRedisplay();   // Trigger a window redisplay
 }
