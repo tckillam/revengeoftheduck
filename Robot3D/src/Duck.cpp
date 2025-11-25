@@ -32,6 +32,7 @@ float beakLength = 0.7f * headRadius;
 float tailRadius = 0.45f * bodyRadius;
 float tailLength = 0.5f * bodyRadius;
 float boothLength = 20;
+float gunLength = 5;	
 
 // Control duck body rotation on base
 float duckAngle = 0;
@@ -78,10 +79,10 @@ GLfloat duckArm_mat_diffuse[] = { 0.5f,0.0f,0.0f,1.0f };
 GLfloat duckArm_mat_specular[] = { 0.7f, 0.6f, 0.6f, 1.0f };
 GLfloat duckArm_mat_shininess[] = { 32.0F };
 
-GLfloat gun_mat_ambient[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-GLfloat gun_mat_diffuse[] = { 0.01f,0.0f,0.01f,0.01f };
-GLfloat gun_mat_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-GLfloat gun_mat_shininess[] = { 100.0F };
+GLfloat gun_mat_ambient[] = { 0.0f,0.0f,0.0f,1.0f };
+GLfloat gun_mat_diffuse[] = { 0.4f, 0.4f, 0.4f, 1.0f };
+GLfloat gun_mat_specular[] = { 0.774597f, 0.774597f, 0.774597f, 1.0f };
+GLfloat gun_mat_shininess[] = { 76.8F };
 
 GLfloat booth_mat_ambient[] = { 0.25f, 0.25f, 0.25f, 1.0f };
 GLfloat booth_mat_diffuse[] = { 0.4f, 0.4f, 0.4f, 1.0f };
@@ -122,7 +123,7 @@ void animationDuckFlip(int param);
 void drawDuck();
 void drawBody();
 void drawBooth();
-
+void drawGun();
 void drawWaterWave();
 
 // this was chatgpt as we were supposed to use for requirement 8
@@ -196,6 +197,7 @@ int main(int argc, char** argv)
 		//ducks[i].angle = 0.0f;
 		ducks[i].angle2 = 0.0f;
 	}
+
 
 	// Initialize GL
 	initOpenGL(vWidth, vHeight);
@@ -285,6 +287,7 @@ void display(void)
 	// ModelView matrix is set to IV, where I is identity matrix
 	// M = IV
 	drawDuck();
+	drawGun();
 
 	// draw the ducks
 	for (int i = 0; i < flockSize; i++) {
@@ -480,6 +483,52 @@ void drawBooth()
 	glRotatef(-90.0, 1.0, 0.0, 0.0);
 	glutSolidCube(1.0);
 	glPopMatrix();
+	glPopMatrix();
+
+	glPopMatrix();
+}
+
+void drawGun()
+{
+	glMaterialfv(GL_FRONT, GL_AMBIENT, gun_mat_ambient);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, gun_mat_specular);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, gun_mat_diffuse);
+	glMaterialfv(GL_FRONT, GL_SHININESS, gun_mat_shininess);
+
+	GLUquadricObj* myNozzle;
+	myNozzle = gluNewQuadric();
+	gluQuadricDrawStyle(myNozzle, GLU_FILL);
+
+	glPushMatrix();
+	glTranslatef(0, 0, 13); // this will be done last
+	glRotatef(0.0, 0.0, 1.0, 0.0);
+	
+	// the main gun part thingy
+	glPushMatrix();
+	glTranslatef(0, 0, 0);
+	glScalef(gunLength * 0.3, gunLength * 0.3, gunLength);
+	glRotatef(0.0, 0.0, 0.0, 0.0);
+	glutSolidCube(1.0);
+
+		// the handle
+		glPushMatrix();
+		glTranslatef(0, -0.75, 0.35);
+		glScalef(gunLength * 0.2, gunLength * 0.5, gunLength * 0.06);
+		glRotatef(0.0, 0.0, 0.0, 0.0);
+		glutSolidCube(1.0);
+		glPopMatrix();
+
+		// the nozzle/end thingy
+		glPushMatrix();
+		glTranslatef(0, 0.0, -0.7);
+		glScalef(gunLength * 0.2, gunLength * 0.2, gunLength * 0.2);
+		glRotatef(0.0, 0.0, 0.0, 0.0);
+		gluCylinder(myNozzle, 0.45, 0.45, 0.25, 50, 50);
+		glPopMatrix();
+
+
+	glPopMatrix();
+
 
 	glPopMatrix();
 }
