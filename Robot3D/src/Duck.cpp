@@ -291,7 +291,6 @@ void display(void)
 	// ModelView matrix is set to IV, where I is identity matrix
 	// M = IV
 	drawDuck();
-	drawGun();
 
 	// draw the ducks
 	for (int i = 0; i < flockSize; i++) {
@@ -324,14 +323,14 @@ void display(void)
 	//glPopMatrix();
 
 
-	// second duck
-	/*glPushMatrix();
-	glTranslatef(-7, duckPosY, 0);
-	glTranslatef(0, -2, 0);
-	glRotatef(180, 0.0, 0.0, -1.0);
-	glTranslatef(0, 2, 0);
-	drawBody(); 
-	glPopMatrix();*/
+	// draw gun
+	glPushMatrix();
+	glTranslatef(0.0, gunPosY, 15); // this will be done last
+	glTranslatef(0.0, 0, 20);
+	glRotatef(gunPosX, 0.0, 1.0, 0.0);
+	glTranslatef(0.0, 0, -20);
+	drawGun();
+	glPopMatrix();
 
 	glutTimerFunc(10, animationHandler, 0);
 
@@ -504,14 +503,13 @@ void drawGun()
 	gluQuadricDrawStyle(myNozzle, GLU_FILL);
 
 	glPushMatrix();
-	glTranslatef(gunPosX, gunPosY, 15); // this will be done last
-	glRotatef(0.0, 0.0, 1.0, 0.0);
+	//glTranslatef(0.0, gunPosY, 15); // this will be done last
 	
 	// the main gun part thingy
 	glPushMatrix();
-	glTranslatef(0, 0, 0);
+	//glTranslatef(0, 0, 0);
 	glScalef(gunLength * 0.3, gunLength * 0.3, gunLength);
-	glRotatef(0.0, 0.0, 0.0, 0.0);
+	//glRotatef(0.0, 0.0, 0.0, 0.0);
 	glutSolidCube(1.0);
 
 		// the handle
@@ -732,12 +730,12 @@ void mouseMotionHandler(int xMouse, int yMouse)
 	if (currentButton == GLUT_LEFT_BUTTON)
 	{
 		//
-		if (xMouse > mX && gunPosX < 5.0) {
-			gunPosX += 0.1;
+		if (xMouse < mX && gunPosX < 20.0) {
+			gunPosX += 0.25;
 			mX = xMouse;
 		}
-		if (xMouse < mX && gunPosX > -5.0) {
-			gunPosX -= 0.1;
+		if (xMouse > mX && gunPosX > -20.0) {
+			gunPosX -= 0.25;
 			mX = xMouse;
 		}
 	}
