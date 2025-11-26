@@ -33,11 +33,12 @@ float tailRadius = 0.45f * bodyRadius;
 float tailLength = 0.5f * bodyRadius;
 float boothLength = 20;
 float gunLength = 5;
-float bulletRadius = gunLength * 0.1f;
+float bulletRadius = gunLength * 0.05f;
 
 // Control duck body rotation on base
 float duckAngle = 0;
 float duckAngle2 = 0;
+float duckFlipAngle = 0;
 
 float amplitude = 0.2f;   // Height of the sine wave
 float frequency = 3.0f;   // Controls number of waves
@@ -52,7 +53,7 @@ typedef struct Duck {
 	float x; // duck's pos x
 	float y; // duck's pos y
 	float angle = 0; // for rotating up and down
-	float angle2 = 0; // rotating for flipping when shot
+	float duckFlipAngle = 0; // rotating for flipping when shot
 } Duck;
 
 const int flockSize = 6;
@@ -71,6 +72,8 @@ float cubeAngle = 0.0;
 float gunPosX = 0.0;
 float gunPosY = 0.0;
 
+float bulletPosX = 0.0;
+float bulletPoY = 0.0;
 float bulletPosZ = 0.0;
 
 // Lighting/shading and material properties for duck - upcoming lecture - just copy for now
@@ -203,7 +206,7 @@ int main(int argc, char** argv)
 			ducks[i].angle = 180.0f;
 		}
 		//ducks[i].angle = 0.0f;
-		ducks[i].angle2 = 0.0f;
+		ducks[i].duckFlipAngle = 0.0f;
 	}
 
 
@@ -299,11 +302,15 @@ void display(void)
 	// draw the ducks
 	for (int i = 0; i < flockSize; i++) {
 		glPushMatrix();
+		//glScalef(1.5, 1.5, 1.5);
 		glTranslatef(ducks[i].x, ducks[i].y, 0);
 		glTranslatef(0, -2, 0);
 		glRotatef(ducks[i].angle, 0.0, 0.0, -1.0);
 		glTranslatef(0, 2, 0);
+		glPushMatrix();
+		glRotatef(ducks[i].duckFlipAngle, -1.0, 0.0, 0);
 		drawBody();
+		glPopMatrix();
 		glPopMatrix();
 	}
 
@@ -364,6 +371,7 @@ void drawDuck()
 {
 	glPushMatrix(); // copy M = IV and push onto the stack
 
+	glScalef(1.0,1.0,1.0);
 	drawBooth();
 
 	glPopMatrix();
@@ -604,7 +612,7 @@ void animationHandler(int param)
 		// animate the duck right to left
 		else if (ducks[i].angle >= 180.0f && ducks[i].x > -7.0f) {
 			ducks[i].angle = 180.0f;
-			ducks[i].angle2 = 0.0f;
+			ducks[i].duckFlipAngle = 0.0f;
 			ducks[i].x -= 0.00004;
 			ducks[i].y = 0;
 		}
@@ -643,14 +651,26 @@ void animationHandler(int param)
 }
 
 // when f/F is pressed, flip the duck
+//void animationDuckFlip(int param)
+//{
+//	if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f && duckAngle2 <= 90) {
+//		duckAngle2 += 9;
+//		glutTimerFunc(35, animationDuckFlip, 0);
+//	}
+//	else {
+//		duckAngle2 = 90.0f;
+//	}
+//	glutPostRedisplay();
+//}
+
 void animationDuckFlip(int param)
 {
 	if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f && duckAngle2 <= 90) {
-		duckAngle2 += 9;
+		duckFlipAngle += 9;
 		glutTimerFunc(35, animationDuckFlip, 0);
 	}
 	else {
-		duckAngle2 = 90.0f;
+		duckFlipAngle = 90.0f;
 	}
 	glutPostRedisplay();
 }
@@ -661,7 +681,14 @@ void shootingDuck(int param)
 		bulletPosZ = 0.0;
 		//glutTimerFunc(35, animationDuckFlip, 0);
 	}
-	//glutPostRedisplay();
+	// Initalize array of ducks
+	for (int i = 0; i < flockSize; i++) {
+		if (ducks[i].y > 0 && bulletPosZ == -15 && gunPosX > ducks[i].x - 0.7 && gunPosX < ducks[i].x + 0.7) {
+			printf("HIT DUCK %d!\n", i );
+			bulletPosZ = 0.0;
+			ducks[i].duckFlipAngle = 90.0f;
+		}
+	}
 }
 
 // Callback, handles input from the keyboard, function and arrow keys
