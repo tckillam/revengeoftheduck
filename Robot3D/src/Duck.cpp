@@ -130,6 +130,7 @@ void functionKeys(int key, int x, int y);
 void animationHandler(int param);
 void animationDuckFlip(int param);
 void shootingDuck(int param);
+void animationBullet(int param);
 void drawDuck();
 void drawBody();
 void drawBooth();
@@ -586,8 +587,7 @@ void keyboard(unsigned char key, int x, int y)
 		duckAngle2 += 2.0;
 		break;
 	case 'a':
-		bulletPosZ -= 1.0;
-		printf("bulletPosZ: %f\n\n", bulletPosZ);
+		glutTimerFunc(10, animationBullet, 0);
 		break;
 	}
 	glutPostRedisplay();  // Trigger a window redisplay
@@ -675,12 +675,24 @@ void animationDuckFlip(int param)
 	glutPostRedisplay();
 }
 
+void animationBullet(int param)
+{
+	if (bulletPosZ >= -20) {
+		bulletPosZ -= 1.0;
+		glutTimerFunc(35, animationBullet, 0);
+	}
+	else {
+		bulletPosZ = 0.0;
+	}
+	glutPostRedisplay();
+}
+
 void shootingDuck(int param)
 {
-	if (bulletPosZ < -20) {
-		bulletPosZ = 0.0;
-		//glutTimerFunc(35, animationDuckFlip, 0);
-	}
+	//if (bulletPosZ < -20) {
+	//	bulletPosZ = 0.0;
+	//	//glutTimerFunc(35, animationDuckFlip, 0);
+	//}
 	// Initalize array of ducks
 	for (int i = 0; i < flockSize; i++) {
 		if (ducks[i].y > 0 && bulletPosZ == -15 && gunPosX > ducks[i].x - 0.7 && gunPosX < ducks[i].x + 0.7) {
