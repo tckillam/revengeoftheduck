@@ -73,8 +73,10 @@ float gunPosX = 0.0;
 float gunPosY = 0.0;
 
 float bulletPosX = 0.0;
-float bulletPoY = 0.0;
+float bulletPosY = 0.0;
 float bulletPosZ = 0.0;
+
+bool bulletFlying = false;
 
 // Lighting/shading and material properties for duck - upcoming lecture - just copy for now
 // duck RGBA material properties (NOTE: we will learn about this later in the semester)
@@ -351,7 +353,7 @@ void display(void)
 	glPopMatrix();
 	//drawBullet();
 	glutTimerFunc(10, animationHandler, 0);
-	shootingDuck(0);
+	//shootingDuck(0);
 
 	// draw water wave
 	glPushMatrix();
@@ -587,7 +589,8 @@ void keyboard(unsigned char key, int x, int y)
 		duckAngle2 += 2.0;
 		break;
 	case 'a':
-		glutTimerFunc(10, animationBullet, 0);
+		bulletFlying = true;
+		//bulletPosZ += -10.0f;
 		break;
 	}
 	glutPostRedisplay();  // Trigger a window redisplay
@@ -596,6 +599,14 @@ void keyboard(unsigned char key, int x, int y)
 
 void animationHandler(int param)
 {
+
+	if (bulletFlying == true) {
+		bulletPosZ += -0.0004f;
+	}
+	if (bulletPosZ <= -20.0f) {
+		bulletFlying = false;
+		bulletPosZ = 0.0f;
+	}
 
 	// animate each duck in array
 	for (int i = 0; i < flockSize; i++) {
@@ -678,10 +689,14 @@ void animationDuckFlip(int param)
 void animationBullet(int param)
 {
 	if (bulletPosZ >= -20) {
-		bulletPosZ -= 1.0;
-		glutTimerFunc(35, animationBullet, 0);
+		bulletPosZ -= 1;
+		//printf("bulletPosZ: %f\n", bulletPosZ);
+		//printf("gunPosX: %f\n", gunPosX);
+		//printf("gunPosY: %f\n\n", gunPosY);
+		glutTimerFunc(10, animationBullet, 0);
 	}
 	else {
+		// bullet went too far (missed)
 		bulletPosZ = 0.0;
 	}
 	glutPostRedisplay();
@@ -693,12 +708,38 @@ void shootingDuck(int param)
 	//	bulletPosZ = 0.0;
 	//	//glutTimerFunc(35, animationDuckFlip, 0);
 	//}
-	// Initalize array of ducks
+
+	// for each duck in the array of ducks, see if the bullet hit
+	// the bullet's coordinates are bulletPosX, bulletPosY, bulletPosZ
+	// see if that point is within 1 unit of any duck's position
+	//if (bulletPosZ <= 0.0f) {
+	//	for (int i = 0; i < flockSize; i++) {
+	//		if (ducks[i].y > 0) { // only check for ducks that are flying
+	//			float dx = gunPosX - ducks[i].x;
+	//			float dy = gunPosY - ducks[i].y;
+	//			float dz = bulletPosZ - 0.0f; // duck z position is 0
+	//			float distance = sqrt(dx * dx + dy * dy + dz * dz);
+	//			if (distance < 1.5f) { // hit if within 1.5 units
+	//				printf("HIT DUCK %d!\n", i);
+	//				ducks[i].duckFlipAngle = 90.0f;
+	//				bulletPosZ = 0.0f; // reset bullet
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
+
 	for (int i = 0; i < flockSize; i++) {
-		if (ducks[i].y > 0 && bulletPosZ == -15 && gunPosX > ducks[i].x - 0.7 && gunPosX < ducks[i].x + 0.7) {
+		if (ducks[i].y > 0 && bulletPosZ > -16 && bulletPosZ < -14 && 
+			gunPosX > ducks[i].x - 1 && gunPosX < ducks[i].x + 1) {
 			printf("HIT DUCK %d!\n", i );
-			bulletPosZ = 0.0;
+			printf("duckPosX: %f\n", ducks[i].x);
+			printf("duckPosY: %f\n", ducks[i].y);
+			printf("bulletPosZ: %f\n", bulletPosZ);
+			printf("gunPosX: %f\n", gunPosX);
+			printf("gunPosY: %f\n\n", gunPosY);
 			ducks[i].duckFlipAngle = 90.0f;
+			bulletPosZ = 0.0;
 		}
 	}
 }
