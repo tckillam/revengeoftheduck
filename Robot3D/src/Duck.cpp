@@ -340,17 +340,31 @@ void display(void)
 	// draw gun
 	glPushMatrix();
 	glTranslatef(0.0, gunPosY, 15); // this will be done last
-	glTranslatef(0.0, 0, 20);
-	glRotatef(gunPosX, 0.0, 1.0, 0.0);
-	glTranslatef(0.0, 0, -20);
+	glTranslatef(0.0, 0, 15);
+	glRotatef(-gunPosX, 0.0, 1.0, 0.0);
+	glTranslatef(0.0, 0, -15);
 	drawGun();
-	
-		glPushMatrix();
-		glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
-		drawBullet();
-		glPopMatrix();
+
+		//// draw bullet
+		//glPushMatrix();
+		//// bullet relative to gun
+		//if (!bulletFlying) {
+		//	glTranslatef(0.0, 0.0, 2.0); // tip of barrel
+		//}
+		//else {
+		//	glTranslatef(0.0, 0.0, bulletPosZ);
+		//}
+		//drawBullet();
+		//glPopMatrix();
 
 	glPopMatrix();
+
+	// draw bullet
+	glPushMatrix();
+	glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
+	drawBullet();
+	glPopMatrix();
+
 	//drawBullet();
 	glutTimerFunc(10, animationHandler, 0);
 	//shootingDuck(0);
@@ -603,10 +617,14 @@ void animationHandler(int param)
 
 	if (bulletFlying == true) {
 		bulletPosZ += -0.0004f;
+		//printf("bulletPosZ a: %f\n", bulletPosZ);	
 	}
-	if (bulletPosZ <= -20.0f) {
+	if (bulletPosZ <= -20.0f || bulletFlying == false) {
 		bulletFlying = false;
-		bulletPosZ = 0.0f;
+		bulletPosZ = 15.0f;
+		bulletPosY = gunPosY;
+		bulletPosX = gunPosX;
+		//printf("bulletPosZ b: %f\n", bulletPosZ);
 	}
 
 	// animate each duck in array
@@ -617,11 +635,20 @@ void animationHandler(int param)
 			ducks[i].x += 0.00004;
 
 			// check for bullet hit
-			if (bulletPosZ < -14 && bulletPosZ > -16 &&
-				gunPosX > ducks[i].x - 0.5f && gunPosX < ducks[i].x + 0.5f &&
-				gunPosY > ducks[i].y - 0.5f && gunPosY < ducks[i].y + 0.5f) {
+			if (bulletPosZ < -13 && bulletPosZ > -17 &&
+				gunPosX > ducks[i].x - 2.0f && gunPosX < ducks[i].x + 2.0f &&
+				gunPosY > ducks[i].y - 2.0f && gunPosY < ducks[i].y + 2.0f) {
 				// hit duck
 				ducks[i].duckFlipAngle = 90.0f;
+				//print the coordinates of the duck that has just been shot
+				printf("HIT DUCK %d!\n", i);
+				printf("duckPosX: %f\n", ducks[i].x);
+				printf("duckPosY: %f\n", ducks[i].y);
+				printf("bulletPosZ: %f\n", bulletPosZ);
+				printf("gunPosX: %f\n", gunPosX);
+				printf("gunPosY: %f\n\n", gunPosY);
+				bulletPosZ = 0.0f; // reset bullet
+				bulletFlying = false;
 			}
 		}
 		// rotate duck down
@@ -837,12 +864,12 @@ void mouseMotionHandler(int xMouse, int yMouse)
 	//if (currentButton == GLUT_LEFT_BUTTON)
 	//{
 		//
-		if (xMouse < mX && gunPosX < 13.0) {
-			gunPosX += 0.25;
+		if (xMouse < mX && gunPosX > -6.75) {
+			gunPosX -= 0.25;
 			mX = xMouse;
 		}
-		if (xMouse > mX && gunPosX > -13.0) {
-			gunPosX -= 0.25;
+		if (xMouse > mX && gunPosX < 6.75) {
+			gunPosX += 0.25;
 			mX = xMouse;
 		}
 	//}
@@ -857,8 +884,10 @@ void mouseMotionHandler(int xMouse, int yMouse)
 			gunPosY -= 0.1;
 			mY = yMouse;
 		}
-		//printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
-	//}
+		printf("gunPosX: %f\nxMouse: %d\n\n", gunPosX, xMouse);
+		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
+	
+		//}
 	//printf("yMouse: %f\n", yMouse);
 
 	glutPostRedisplay();   // Trigger a window redisplay
