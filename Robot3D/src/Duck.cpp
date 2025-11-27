@@ -346,7 +346,7 @@ void display(void)
 	drawGun();
 	
 		glPushMatrix();
-		glTranslatef(0.0, 0.0, bulletPosZ);
+		glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
 		drawBullet();
 		glPopMatrix();
 
@@ -590,7 +590,8 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 		bulletFlying = true;
-		//bulletPosZ += -10.0f;
+		//bulletPosX = gunPosX;
+		//bulletPosY = gunPosY;
 		break;
 	}
 	glutPostRedisplay();  // Trigger a window redisplay
@@ -614,6 +615,14 @@ void animationHandler(int param)
 			ducks[i].angle = 0.0f;
 			ducks[i].y = amplitude * sin(frequency * ducks[i].x);
 			ducks[i].x += 0.00004;
+
+			// check for bullet hit
+			if (bulletPosZ < -14 && bulletPosZ > -16 &&
+				gunPosX > ducks[i].x - 0.5f && gunPosX < ducks[i].x + 0.5f &&
+				gunPosY > ducks[i].y - 0.5f && gunPosY < ducks[i].y + 0.5f) {
+				// hit duck
+				ducks[i].duckFlipAngle = 90.0f;
+			}
 		}
 		// rotate duck down
 		else if (ducks[i].x >= 7.0f && ducks[i].angle < 180.0f) {
