@@ -69,6 +69,7 @@ float cameraZ = 22.0;
 float cubeAngle = 0.0;
 
 // Animation control for ze gun
+float gunAngle = 0.0;
 float gunPosX = 0.0;
 float gunPosY = 0.0;
 
@@ -339,31 +340,31 @@ void display(void)
 
 	// draw gun
 	glPushMatrix();
-	glTranslatef(0.0, gunPosY, 15); // this will be done last
+	glTranslatef(gunPosX, gunPosY, 15); // this will be done last
 	glTranslatef(0.0, 0, 15);
-	glRotatef(-gunPosX, 0.0, 1.0, 0.0);
+	glRotatef(-gunAngle, 0.0, 1.0, 0.0);
 	glTranslatef(0.0, 0, -15);
 	drawGun();
 
-		//// draw bullet
-		//glPushMatrix();
-		//// bullet relative to gun
+		// draw bullet
+		glPushMatrix();
+		// bullet relative to gun
 		//if (!bulletFlying) {
 		//	glTranslatef(0.0, 0.0, 2.0); // tip of barrel
 		//}
 		//else {
-		//	glTranslatef(0.0, 0.0, bulletPosZ);
+		glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
 		//}
-		//drawBullet();
-		//glPopMatrix();
+		drawBullet();
+		glPopMatrix();
 
 	glPopMatrix();
 
 	// draw bullet
-	glPushMatrix();
+	/*glPushMatrix();
 	glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
 	drawBullet();
-	glPopMatrix();
+	glPopMatrix();*/
 
 	//drawBullet();
 	glutTimerFunc(10, animationHandler, 0);
@@ -604,7 +605,7 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 		bulletFlying = true;
-		//bulletPosX = gunPosX;
+		//bulletPosX = gunAngle;
 		//bulletPosY = gunPosY;
 		break;
 	}
@@ -617,14 +618,16 @@ void animationHandler(int param)
 
 	if (bulletFlying == true) {
 		bulletPosZ += -0.0004f;
+		//bulletPosX += gunAngle * 0.000004f;
 		//printf("bulletPosZ a: %f\n", bulletPosZ);	
 	}
 	if (bulletPosZ <= -20.0f || bulletFlying == false) {
 		bulletFlying = false;
 		bulletPosZ = 15.0f;
-		bulletPosY = gunPosY;
-		bulletPosX = gunPosX;
-		//printf("bulletPosZ b: %f\n", bulletPosZ);
+		//bulletPosY = gunPosY;
+		//bulletPosX = gunAngle;
+		//printf("bulletPosX: %f\n", bulletPosX);
+		//printf("bulletPosY: %f\n\n", bulletPosY);
 	}
 
 	// animate each duck in array
@@ -636,7 +639,7 @@ void animationHandler(int param)
 
 			// check for bullet hit
 			if (bulletPosZ < -13 && bulletPosZ > -17 &&
-				gunPosX > ducks[i].x - 2.0f && gunPosX < ducks[i].x + 2.0f &&
+				gunAngle / 2 > ducks[i].x - 2.0f && gunAngle / 2 < ducks[i].x + 2.0f &&
 				gunPosY > ducks[i].y - 2.0f && gunPosY < ducks[i].y + 2.0f) {
 				// hit duck
 				ducks[i].duckFlipAngle = 90.0f;
@@ -645,8 +648,9 @@ void animationHandler(int param)
 				printf("duckPosX: %f\n", ducks[i].x);
 				printf("duckPosY: %f\n", ducks[i].y);
 				printf("bulletPosZ: %f\n", bulletPosZ);
-				printf("gunPosX: %f\n", gunPosX);
+				printf("gunAngle: %f\n", gunAngle);
 				printf("gunPosY: %f\n\n", gunPosY);
+				printf("gunPosX: %f\n\n", gunPosX);
 				bulletPosZ = 0.0f; // reset bullet
 				bulletFlying = false;
 			}
@@ -726,14 +730,16 @@ void animationBullet(int param)
 {
 	if (bulletPosZ >= -20) {
 		bulletPosZ -= 1;
+		bulletPosX += gunAngle;
 		//printf("bulletPosZ: %f\n", bulletPosZ);
-		//printf("gunPosX: %f\n", gunPosX);
+		//printf("gunAngle: %f\n", gunAngle);
 		//printf("gunPosY: %f\n\n", gunPosY);
 		glutTimerFunc(10, animationBullet, 0);
 	}
 	else {
 		// bullet went too far (missed)
 		bulletPosZ = 0.0;
+		//bulletPosX = gunAngle;
 	}
 	glutPostRedisplay();
 }
@@ -751,7 +757,7 @@ void shootingDuck(int param)
 	//if (bulletPosZ <= 0.0f) {
 	//	for (int i = 0; i < flockSize; i++) {
 	//		if (ducks[i].y > 0) { // only check for ducks that are flying
-	//			float dx = gunPosX - ducks[i].x;
+	//			float dx = gunAngle - ducks[i].x;
 	//			float dy = gunPosY - ducks[i].y;
 	//			float dz = bulletPosZ - 0.0f; // duck z position is 0
 	//			float distance = sqrt(dx * dx + dy * dy + dz * dz);
@@ -767,12 +773,12 @@ void shootingDuck(int param)
 
 	for (int i = 0; i < flockSize; i++) {
 		if (ducks[i].y > 0 && bulletPosZ > -16 && bulletPosZ < -14 && 
-			gunPosX > ducks[i].x - 1 && gunPosX < ducks[i].x + 1) {
+			gunAngle > ducks[i].x - 1 && gunAngle < ducks[i].x + 1) {
 			printf("HIT DUCK %d!\n", i );
 			printf("duckPosX: %f\n", ducks[i].x);
 			printf("duckPosY: %f\n", ducks[i].y);
 			printf("bulletPosZ: %f\n", bulletPosZ);
-			printf("gunPosX: %f\n", gunPosX);
+			printf("gunAngle: %f\n", gunAngle);
 			printf("gunPosY: %f\n\n", gunPosY);
 			ducks[i].duckFlipAngle = 90.0f;
 			bulletPosZ = 0.0;
@@ -864,12 +870,12 @@ void mouseMotionHandler(int xMouse, int yMouse)
 	//if (currentButton == GLUT_LEFT_BUTTON)
 	//{
 		//
-		if (xMouse < mX && gunPosX > -6.75) {
-			gunPosX -= 0.25;
+		if (xMouse < mX && gunAngle > -14) {
+			gunAngle -= 0.25;
 			mX = xMouse;
 		}
-		if (xMouse > mX && gunPosX < 6.75) {
-			gunPosX += 0.25;
+		if (xMouse > mX && gunAngle < 14) {
+			gunAngle += 0.25;
 			mX = xMouse;
 		}
 	//}
@@ -884,8 +890,10 @@ void mouseMotionHandler(int xMouse, int yMouse)
 			gunPosY -= 0.1;
 			mY = yMouse;
 		}
-		printf("gunPosX: %f\nxMouse: %d\n\n", gunPosX, xMouse);
+		printf("gunPosX: %f\n", gunPosX);
+		printf("gunAngle: %f\nxMouse: %d\n", gunAngle, xMouse);
 		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
+		//printf("gunPosX: %f\n", gunPosX);
 	
 		//}
 	//printf("yMouse: %f\n", yMouse);
