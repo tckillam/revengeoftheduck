@@ -3,16 +3,33 @@
 ********************************************************************/
 #include <Duck.h>
 
-//#include <stdlib.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <math.h>
-//#include <gl/glut.h>
-//#include <utility>
-//#include <vector>
-#include "Vectors.h"
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+
+#define GLEW_STATIC
+#include <GL/glew.h>
+#ifdef _WIN32
+#include <GL/wglew.h> // For wglSwapInterval
+#endif
+
+#define FREEGLUT_STATIC
+#include <GL/freeglut.h>
+
+#define GLM_FORCE_RADIANS
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+
 #include "CubeMesh.h"
 #include "QuadMesh.h"
+#include "Vectors.h"
 
 
 // so i can use remainder on duckAngle
@@ -61,7 +78,7 @@ const int flockSize = 6;
 // array of ducks
 Duck ducks[flockSize];
 
-float cameraX = 0;
+float cameraX = 0.0;
 float cameraY = 6.0;
 float cameraZ = 22.0;
 
@@ -116,6 +133,21 @@ int currentButton;
 // A template cube mesh
 CubeMesh* cubeMesh = NULL;
 
+//// from profs code ************************************************
+// Booth consists of top, sides and bottom
+CubeMesh* boothTop = NULL;
+CubeMesh* boothLeftSide = NULL;
+CubeMesh* boothRightSide = NULL;
+CubeMesh* boothFront = NULL;
+bool drawBoothFront = true;
+// Arcade Booth 
+GLfloat booth_ambient[] = { 0.05f, 0.0f, 0.0f, 1.0f };
+GLfloat booth_diffuse[] = { 0.05f, 0.0f, 0.0f, 1.0f };
+GLfloat booth_specular[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+GLfloat booth_shininess[] = { 4.0F };
+
+
+
 // A flat open mesh
 QuadMesh* groundMesh = NULL;
 
@@ -140,6 +172,147 @@ void drawBooth();
 void drawGun();
 void drawBullet();
 void drawWaterWave();
+
+///////////////prof codeeeeeeeeeeeeeeeeeeeeeeee
+//void initGL();
+//void InitGLEW();
+//bool initGLSL();
+//int  initGLUT(int argc, char** argv);
+bool initGlobalVariables();
+//void clearSharedMem();
+//void initLights();
+//void setCamera(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
+//void animationHandler(int param);
+//void toPerspective();
+//GLuint loadTexture(const char* fileName, bool wrap = true);
+
+//blinn shading with texture =============================
+const char* vsSource = R"(
+// GLSL version
+#version 110
+// uniforms
+uniform mat4 matrixModelView;
+uniform mat4 matrixNormal;
+uniform mat4 matrixModelViewProjection;
+// vertex attribs (input)
+attribute vec3 vertexPosition;
+attribute vec3 vertexNormal;
+
+// varyings (output)
+varying vec3 esVertex, esNormal;
+
+void main()
+{
+    esVertex = vec3(matrixModelView * vec4(vertexPosition, 1.0));
+    esNormal = vec3(matrixNormal * vec4(vertexNormal, 1.0));
+    gl_Position = matrixModelViewProjection * vec4(vertexPosition, 1.0);
+}
+)";
+
+const char* fsSource = R"(
+// GLSL version
+#version 110
+// uniforms
+uniform vec4 lightPosition;             // should be in the eye space
+uniform vec4 lightAmbient;              // light ambient color
+uniform vec4 lightDiffuse;              // light diffuse color
+uniform vec4 lightSpecular;             // light specular color
+uniform vec4 materialAmbient;           // material ambient color
+uniform vec4 materialDiffuse;           // material diffuse color
+uniform vec4 materialSpecular;          // material specular color
+uniform float materialShininess;        // material specular shininess
+
+
+// varyings
+varying vec3 esVertex, esNormal;
+void main()
+{
+    vec3 normal = normalize(esNormal);
+    vec3 light;
+    if(lightPosition.w == 0.0)
+    {
+        light = normalize(lightPosition.xyz);
+    }
+    else
+    {
+        light = normalize(lightPosition.xyz - esVertex);
+    }
+    vec3 view = normalize(-esVertex);
+    vec3 halfv = normalize(light + view);
+
+    vec3 color = lightAmbient.rgb * materialAmbient.rgb;        // begin with ambient
+    float dotNL = max(dot(normal, light), 0.0);
+    color += lightDiffuse.rgb * materialDiffuse.rgb * dotNL;    // add diffuse
+                  // modulate texture map
+    float dotNH = max(dot(normal, halfv), 0.0);
+    color += pow(dotNH, materialShininess) * lightSpecular.rgb * materialSpecular.rgb; // add specular
+
+    // set frag color
+    gl_FragColor = vec4(color, materialDiffuse.a);
+}
+)";
+
+/////////////////////////////////////////////////////////////////////////////////
+//// Initialize global variables
+/////////////////////////////////////////////////////////////////////////////////
+bool initGlobalVariables()
+{
+
+	// Set up ground quad mesh
+	Vector3 origin = Vector3(-16.0f, -3.0f, 16.0f);
+	Vector3 dir1v = Vector3(1.0f, 0.0f, 0.0f);
+	Vector3 dir2v = Vector3(0.0f, 0.0f, -1.0f);
+	groundMesh = new QuadMesh(meshSize, 32.0);
+	groundMesh->InitMesh(meshSize, origin, 32.0, 32.0, dir1v, dir2v);
+
+
+	Vector3 ambient = Vector3(0.0f, 0.05f, 0.0f);
+	Vector3 diffuse = Vector3(0.4f, 0.8f, 0.4f);
+	Vector3 specular = Vector3(0.04f, 0.04f, 0.04f);
+	float shininess = 0.2;
+	groundMesh->SetMaterial(ambient, diffuse, specular, shininess);
+
+	boothTop = new CubeMesh();
+	ambient = Vector3(0.05f, 0.00f, 0.0f);
+	diffuse = Vector3(0.05f, 0.0f, 0.0f);
+	specular = Vector3(0.5f, 0.5f, 0.5f);
+	shininess = 4.0;
+	boothTop->setMaterial(ambient, diffuse, specular, shininess);
+
+	boothLeftSide = new CubeMesh();
+	ambient = Vector3(0.00f, 0.00f, 0.05f);
+	diffuse = Vector3(0.00f, 0.0f, 0.05f);
+	specular = Vector3(0.5f, 0.5f, 0.5f);
+	shininess = 4.0;
+	boothLeftSide->setMaterial(ambient, diffuse, specular, shininess);
+
+	boothRightSide = new CubeMesh();
+
+	boothRightSide->setMaterial(ambient, diffuse, specular, shininess);
+
+	boothFront = new CubeMesh();
+	boothFront->setMaterial(ambient, diffuse, specular, shininess);
+
+	return true;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// clean up global vars
+///////////////////////////////////////////////////////////////////////////////
+//void clearSharedMem()
+//{
+//	// clean up VBOs
+//	if (vboSupported)
+//	{
+//		glDeleteBuffers(1, &vboId1);
+//		glDeleteBuffers(1, &iboId1);
+//		glDeleteBuffers(1, &vboId2);
+//		glDeleteBuffers(1, &iboId2);
+//		vboId1 = iboId1 = 0;
+//		vboId2 = iboId2 = 0;
+//	}
+//}
 
 // this was chatgpt as we were supposed to use for requirement 8
 void drawWaterWave() {
@@ -216,6 +389,9 @@ int main(int argc, char** argv)
 
 	// Initialize GL
 	initOpenGL(vWidth, vHeight);
+
+	// init global vars
+	initGlobalVariables();
 
 	// Register callback functions
 	glutDisplayFunc(display);
@@ -301,7 +477,37 @@ void display(void)
 	// Apply modelling transformations M to move duck
 	// ModelView matrix is set to IV, where I is identity matrix
 	// M = IV
-	drawDuck();
+	//drawBooth();
+
+	//**************************************************************************************** prof booth
+	//   // Draw Booth 
+	glPushMatrix();
+	glTranslatef(0, 8.0f, -8.0);
+	glScalef(16.0f, 2.0f, 2.0f);
+	boothTop->drawCubeMesh();
+	glPopMatrix();
+
+
+	glPushMatrix();
+	glTranslatef(-14.0, 0.0f, -8.0);
+	glScalef(1.0f, 10.0f, 2.0f);
+	boothLeftSide->drawCubeMesh();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(14.0, 0.0f, -8.0);
+	glScalef(1.0f, 10.0f, 2.0f);
+	boothRightSide->drawCubeMesh();
+	glPopMatrix();
+
+	if (drawBoothFront)
+	{
+		glPushMatrix();
+		glTranslatef(0, -6.0, 1.0);
+		glScalef(12.0f, 4.0f, 0.5f);
+		boothFront->drawCubeMesh();
+		glPopMatrix();
+	}
 
 	// draw the ducks
 	for (int i = 0; i < flockSize; i++) {
@@ -623,7 +829,7 @@ void animationHandler(int param)
 	}
 	if (bulletPosZ <= -20.0f || bulletFlying == false) {
 		bulletFlying = false;
-		bulletPosZ = 15.0f;
+		bulletPosZ = 0.0f;
 		//bulletPosY = gunPosY;
 		//bulletPosX = gunAngle;
 		//printf("bulletPosX: %f\n", bulletPosX);
@@ -649,7 +855,7 @@ void animationHandler(int param)
 				printf("duckPosY: %f\n", ducks[i].y);
 				printf("bulletPosZ: %f\n", bulletPosZ);
 				printf("gunAngle: %f\n", gunAngle);
-				printf("gunPosY: %f\n\n", gunPosY);
+				printf("gunPosY: %f\n", gunPosY);
 				printf("gunPosX: %f\n\n", gunPosX);
 				bulletPosZ = 0.0f; // reset bullet
 				bulletFlying = false;

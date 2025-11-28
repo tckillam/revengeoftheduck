@@ -47,12 +47,6 @@ static GLfloat iquadNormals[][3] = { { 0.0, 0.0, -1.0},	// Back Face
 
 CubeMesh::CubeMesh()
 {
-	angle = 0.0f;
-	sfx = sfy = sfz = 1.0;
-	tx = 0.0;
-	ty = 0.0;
-	tz = 0.0;
-
 	// Vertex positions of a standard size cube (width 2), centered at the origin
 	// of its own Model Coordinate System
 	vertices = ivertices;
@@ -100,7 +94,7 @@ void CubeMesh::drawCubeMesh()
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-	
+
 	// Draw Cube using simple immediate mode rendering
 	glBegin(GL_QUADS);
 	// Back Face
