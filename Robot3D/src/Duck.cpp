@@ -58,6 +58,8 @@ float duckAngle = 0;
 float duckAngle2 = 0;
 float duckFlipAngle = 0;
 
+int score = 0;
+
 float amplitude = 0.2f;   // Height of the sine wave
 float frequency = 3.0f;   // Controls number of waves
 float length = boothLength;      // Length of the wall
@@ -862,6 +864,8 @@ void animationHandler(int param)
 				printf("gunAngle: %f\n", gunAngle);
 				printf("gunPosY: %f\n", gunPosY);
 				printf("gunPosX: %f\n\n", gunPosX);
+				score += 1;
+				printf("SCORE: %d\n\n", score);
 				bulletPosZ = 0.0f; // reset bullet
 				bulletFlying = false;
 			}

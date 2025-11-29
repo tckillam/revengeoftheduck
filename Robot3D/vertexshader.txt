@@ -1,0 +1,14 @@
+varying vec3 N;  
+varying vec3 p;
+varying vec3 vertexObjPos;
+
+void main(void)
+{
+   // eye coords
+   p = vec3(gl_ModelViewMatrix * gl_Vertex);       
+   N = normalize(gl_NormalMatrix * gl_Normal);
+
+   gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+
+
+}
