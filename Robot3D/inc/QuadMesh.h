@@ -52,7 +52,6 @@ private:
 	void FreeMemory();
 
 	GLuint groundTexture;
-	GLuint LoadTexture(const std::string& file);
 
 public:
 

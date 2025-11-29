@@ -45,26 +45,6 @@ static GLfloat iquadNormals[][3] = { { 0.0, 0.0, -1.0},	// Back Face
 							  { 0.0, 0.0,  1.0},	// Front Face
 							  { 0.0,-1.0,  0.0} };	// Bottom Face
 
-GLuint CubeMesh::LoadTexture(const std::string& file)
-{
-	GLuint textureID = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-
-	if (textureID == 0) {
-		std::cerr << "Failed to load texture: " << file << std::endl;
-		return 0;
-	}
-
-
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return textureID;
-}
-
 CubeMesh::CubeMesh()
 {
 	// Vertex positions of a standard size cube (width 2), centered at the origin
@@ -87,11 +67,8 @@ CubeMesh::CubeMesh()
 	mat_diffuse[3] = 1.0;
 	mat_shininess[0] = 4.0;
 
-	boothTexture = LoadTexture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\bg_cold.png");
-	if (boothTexture == 0) {
-		std::cerr << "flowers.jpg failed to load." << std::endl;
-	}
-
+	boothTexture = SOIL_load_OGL_texture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\bg_cold.png", 
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 
 }
 

@@ -29,26 +29,6 @@
 #define BUFFER_OFFSET(offset) ((void*)(offset))
 #define MEMBER_OFFSET(s,m) ((char*)NULL + (offsetof(s,m)))
 
-GLuint QuadMesh::LoadTexture(const std::string& file)
-{
-	GLuint textureID = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-
-	if (textureID == 0) {
-		std::cerr << "Failed to load texture: " << file << std::endl;
-		return 0;
-	}
-
-
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return textureID;
-}
-
 QuadMesh::QuadMesh(int maxMeshSize, float meshDim)
 {
 	minMeshSize = 1;
@@ -77,10 +57,8 @@ QuadMesh::QuadMesh(int maxMeshSize, float meshDim)
 	mat_diffuse[3] = 1.0;
 	mat_shininess[0] = 0.0;
 
-	groundTexture = LoadTexture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\grass2.jpg");
-	if (groundTexture == 0) {
-		std::cerr << "grass.png failed to load." << std::endl;
-	}
+	groundTexture = SOIL_load_OGL_texture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\grass2.jpg", 
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 
 }
 

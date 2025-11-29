@@ -485,7 +485,7 @@ void display(void)
 	//drawBooth();
 
 	//**************************************************************************************** prof booth
-	//   // Draw Booth 
+	// Draw Booth 
 	glPushMatrix();
 	glTranslatef(0, 8.0f, -8.0);
 	glScalef(16.0f, 2.0f, 2.0f);

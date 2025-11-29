@@ -17,7 +17,6 @@ private:
     float mat_shininess[1];
 
     GLuint boothTexture;
-    GLuint LoadTexture(const std::string& file);
 
 public:
     CubeMesh();
