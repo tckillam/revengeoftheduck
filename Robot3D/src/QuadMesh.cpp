@@ -77,7 +77,7 @@ QuadMesh::QuadMesh(int maxMeshSize, float meshDim)
 	mat_diffuse[3] = 1.0;
 	mat_shininess[0] = 0.0;
 
-	groundTexture = LoadTexture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\bg_cold.png");
+	groundTexture = LoadTexture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\grass2.jpg");
 	if (groundTexture == 0) {
 		std::cerr << "grass.png failed to load." << std::endl;
 	}
