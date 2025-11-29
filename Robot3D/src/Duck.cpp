@@ -36,6 +36,7 @@
 #include <cmath>
 #include <math.h>
 
+//GLuint boothTexture = LoadTexture("flowers.jpg");
 
 const int vWidth = 650;    // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
@@ -372,6 +373,21 @@ int main(int argc, char** argv)
 	glutInitWindowPosition(200, 30);
 	glutCreateWindow("3D Hierarchical Example");
 
+	// Initialize GLEW here
+	GLenum err = glewInit();
+	if (err != GLEW_OK) {
+		std::cerr << "GLEW init failed: " << glewGetErrorString(err) << std::endl;
+		return 1;
+	}
+
+	GLuint testTex = SOIL_load_OGL_texture("flowers.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+	if (testTex == 0) {
+		std::cerr << "SOIL test failed: flowers.jpg not found or unreadable." << std::endl;
+	}
+	else {
+		std::cerr << "SOIL test succeeded: texture ID = " << testTex << std::endl;
+	}
+
 	// Initalize array of ducks
 	for (int i = 0; i < flockSize; i++) {
 		ducks[i].x = -7.0f + i * 3.0f; // spread ducks out along x-axis
@@ -411,6 +427,9 @@ int main(int argc, char** argv)
 // Set up OpenGL. For viewport and projection setup see reshape(). 
 void initOpenGL(int w, int h)
 {
+	glEnable(GL_TEXTURE_2D);
+
+
 	// Set up and enable lighting
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
