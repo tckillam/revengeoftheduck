@@ -21,12 +21,33 @@
 
 #include "Vectors.h"
 #include "QuadMesh.h"
+#include <SOIL.h>
 
 #define POSITION_ATTRIBUTE 0
 #define NORMAL_ATTRIBUTE 2
 
 #define BUFFER_OFFSET(offset) ((void*)(offset))
 #define MEMBER_OFFSET(s,m) ((char*)NULL + (offsetof(s,m)))
+
+GLuint QuadMesh::LoadTexture(const std::string& file)
+{
+	GLuint textureID = SOIL_load_OGL_texture(file.c_str(), SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
+	if (textureID == 0) {
+		std::cerr << "Failed to load texture: " << file << std::endl;
+		return 0;
+	}
+
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return textureID;
+}
 
 QuadMesh::QuadMesh(int maxMeshSize, float meshDim)
 {
@@ -55,6 +76,11 @@ QuadMesh::QuadMesh(int maxMeshSize, float meshDim)
 	mat_diffuse[2] = 0.0;
 	mat_diffuse[3] = 1.0;
 	mat_shininess[0] = 0.0;
+
+	groundTexture = LoadTexture("C:\\Users\\there\\CPS511\\A2\\Theresa Killam - CPS511 - Assignment 2\\bg_cold.png");
+	if (groundTexture == 0) {
+		std::cerr << "grass.png failed to load." << std::endl;
+	}
 
 }
 
@@ -88,6 +114,8 @@ bool QuadMesh::CreateMemory()
 	{
 		return false;
 	}
+
+
 	return true;
 }
 
@@ -211,6 +239,9 @@ void QuadMesh::DrawMesh(int meshSize)
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, groundTexture);
+
 	for (int j = 0; j < meshSize; j++)
 	{
 		for (int k = 0; k < meshSize; k++)
@@ -220,6 +251,7 @@ void QuadMesh::DrawMesh(int meshSize)
 			glNormal3f(quads[currentQuad].vertices[0]->normal.x,
 				quads[currentQuad].vertices[0]->normal.y,
 				quads[currentQuad].vertices[0]->normal.z);
+			glTexCoord2f(0.0f, 0.0f);
 			glVertex3f(quads[currentQuad].vertices[0]->position.x,
 				quads[currentQuad].vertices[0]->position.y,
 				quads[currentQuad].vertices[0]->position.z);
@@ -227,7 +259,7 @@ void QuadMesh::DrawMesh(int meshSize)
 			glNormal3f(quads[currentQuad].vertices[1]->normal.x,
 				quads[currentQuad].vertices[1]->normal.y,
 				quads[currentQuad].vertices[1]->normal.z);
-
+			glTexCoord2f(1.0f, 0.0f);
 			glVertex3f(quads[currentQuad].vertices[1]->position.x,
 				quads[currentQuad].vertices[1]->position.y,
 				quads[currentQuad].vertices[1]->position.z);
@@ -235,7 +267,7 @@ void QuadMesh::DrawMesh(int meshSize)
 			glNormal3f(quads[currentQuad].vertices[2]->normal.x,
 				quads[currentQuad].vertices[2]->normal.y,
 				quads[currentQuad].vertices[2]->normal.z);
-
+			glTexCoord2f(1.0f, 1.0f);
 			glVertex3f(quads[currentQuad].vertices[2]->position.x,
 				quads[currentQuad].vertices[2]->position.y,
 				quads[currentQuad].vertices[2]->position.z);
@@ -243,7 +275,7 @@ void QuadMesh::DrawMesh(int meshSize)
 			glNormal3f(quads[currentQuad].vertices[3]->normal.x,
 				quads[currentQuad].vertices[3]->normal.y,
 				quads[currentQuad].vertices[3]->normal.z);
-
+			glTexCoord2f(0.0f, 1.0f);
 			glVertex3f(quads[currentQuad].vertices[3]->position.x,
 				quads[currentQuad].vertices[3]->position.y,
 				quads[currentQuad].vertices[3]->position.z);
@@ -251,43 +283,28 @@ void QuadMesh::DrawMesh(int meshSize)
 			currentQuad++;
 		}
 	}
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_TEXTURE_2D);
+
 }
 
 // VBO Mode Draw
 void QuadMesh::DrawMeshVBO(int meshSize)
 {
 
-	//glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-	//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-	//glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-	//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-	glBindVertexArray(vao);
-	glDrawElements(GL_QUADS, indices.size(), GL_UNSIGNED_INT, NULL);
 
 }
 void QuadMesh::CreateMeshVBO(int meshSize, GLint attribVertexPosition, GLint attribVertexNormal)
 {
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glGenBuffers(3, vbos);
 
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
-	glBufferData(GL_ARRAY_BUFFER, (unsigned int)verticesVBO.size() * sizeof(float), verticesVBO.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(attribVertexPosition, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-	glEnableVertexAttribArray(attribVertexPosition);// POSITION_ATTRIBUTE);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
-	glBufferData(GL_ARRAY_BUFFER, normalsVBO.size() * sizeof(float), normalsVBO.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(attribVertexNormal, 3, GL_FLOAT, GL_TRUE, 0, BUFFER_OFFSET(0));
-	glEnableVertexAttribArray(attribVertexNormal);// NORMAL_ATTRIBUTE);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[2]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
+
+
+
+
+
+
 
 void QuadMesh::FreeMemory()
 {

@@ -1,5 +1,3 @@
-#include "Vectors.h"
-
 struct MeshVertex
 {
 	Vector3	position;
@@ -29,6 +27,8 @@ private:
 	int numQuads;
 	MeshQuad* quads;
 
+	// These structures are filled in for you in InitMesh() and you may make use 
+	// of them for drawing the mesh using VBOs (or a VAO and VBOs)
 	std::vector<float> verticesVBO;
 	std::vector<float> normalsVBO;
 	std::vector<unsigned int> indices;
@@ -51,6 +51,9 @@ private:
 	bool CreateMemory();
 	void FreeMemory();
 
+	GLuint groundTexture;
+	GLuint LoadTexture(const std::string& file);
+
 public:
 
 	typedef std::pair<int, int> MaxMeshDim;
@@ -70,9 +73,14 @@ public:
 	void QuadMesh::addNormal(float nx, float ny, float nz);
 	void QuadMesh::addIndices(unsigned int i1, unsigned int i2, unsigned int i3, unsigned int i4);
 	bool InitMesh(int meshSize, Vector3 origin, double meshLength, double meshWidth, Vector3 dir1, Vector3 dir2);
-	void DrawMesh(int meshSize);
+	void DrawMesh(int meshSize); // Draws using Immediate Mode Rendering
+
+	// Draw using VBOs - you need to fill in this code as well as CreateMeshVBO and then in 
+	// Duck.cpp you need to call DrawMeshVBO() instead of DrawMesh()
 	void DrawMeshVBO(int meshSize);
 	void QuadMesh::CreateMeshVBO(int meshSize, GLint attribVertexPosition, GLint attribVertexNormal);
+
+
 	void SetMaterial(Vector3 ambient, Vector3 diffuse, Vector3 specular, double shininess);
 	void ComputeNormals();
 

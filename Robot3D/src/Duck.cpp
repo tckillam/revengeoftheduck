@@ -259,19 +259,19 @@ void main()
 bool initGlobalVariables()
 {
 
-	// Set up ground quad mesh
-	Vector3 origin = Vector3(-16.0f, -3.0f, 16.0f);
-	Vector3 dir1v = Vector3(1.0f, 0.0f, 0.0f);
-	Vector3 dir2v = Vector3(0.0f, 0.0f, -1.0f);
-	groundMesh = new QuadMesh(meshSize, 32.0);
-	groundMesh->InitMesh(meshSize, origin, 32.0, 32.0, dir1v, dir2v);
+	//// Set up ground quad mesh
+	//Vector3 origin = Vector3(-16.0f, -3.0f, 16.0f);
+	//Vector3 dir1v = Vector3(1.0f, 0.0f, 0.0f);
+	//Vector3 dir2v = Vector3(0.0f, 0.0f, -1.0f);
+	//groundMesh = new QuadMesh(meshSize, 32.0);
+	//groundMesh->InitMesh(meshSize, origin, 32.0, 32.0, dir1v, dir2v);
 
 
 	Vector3 ambient = Vector3(0.0f, 0.05f, 0.0f);
 	Vector3 diffuse = Vector3(0.4f, 0.8f, 0.4f);
 	Vector3 specular = Vector3(0.04f, 0.04f, 0.04f);
 	float shininess = 0.2;
-	groundMesh->SetMaterial(ambient, diffuse, specular, shininess);
+	//groundMesh->SetMaterial(ambient, diffuse, specular, shininess);
 
 	boothTop = new CubeMesh();
 	ambient = Vector3(0.05f, 0.00f, 0.0f);
@@ -373,20 +373,6 @@ int main(int argc, char** argv)
 	glutInitWindowPosition(200, 30);
 	glutCreateWindow("3D Hierarchical Example");
 
-	// Initialize GLEW here
-	GLenum err = glewInit();
-	if (err != GLEW_OK) {
-		std::cerr << "GLEW init failed: " << glewGetErrorString(err) << std::endl;
-		return 1;
-	}
-
-	GLuint testTex = SOIL_load_OGL_texture("flowers.jpg", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
-	if (testTex == 0) {
-		std::cerr << "SOIL test failed: flowers.jpg not found or unreadable." << std::endl;
-	}
-	else {
-		std::cerr << "SOIL test succeeded: texture ID = " << testTex << std::endl;
-	}
 
 	// Initalize array of ducks
 	for (int i = 0; i < flockSize; i++) {
