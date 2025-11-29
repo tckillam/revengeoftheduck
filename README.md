@@ -1,3 +1,2 @@
-Requirement 1 is done.
-I think requirement 4 is good.
-Currently working on requirement 5.
+Requirements 1, 4 and 5 are done.
+Halfway through requirement 3 and we shall pray for a speedy requirement 2.
