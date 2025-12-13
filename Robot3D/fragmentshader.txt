@@ -25,4 +25,26 @@ void main (void)
    // write Total Color:  
    // gl_FrontLightModelProduct.sceneColor = emissive material property for front facing surfaces
    gl_FragColor = gl_FrontLightModelProduct.sceneColor + Iamb + Idiff + Ispec;   
+
+
+      // --- Bullseye logic ---
+   float dist = length(vertexObjPos.xy); // distance from center in object space
+   float minRadius = 0.2;
+   float maxRadius = 0.3;
+
+   if (dist >= minRadius && dist <= maxRadius) {
+       // Override with bullseye material
+       vec4 bullseyeColor = bullseyeDiffuse;
+
+       // Add shiny red specular highlight
+       float spec = pow(max(dot(R,V),0.0), bullseyeShininess);
+       bullseyeColor += spec * bullseyeSpecular;
+
+       gl_FragColor = bullseyeColor;
+   } else {
+       // Normal shading
+       gl_FragColor = baseColor;
+   }
+
+
 }

@@ -36,7 +36,6 @@
 #include <cmath>
 #include <math.h>
 
-//GLuint boothTexture = LoadTexture("flowers.jpg");
 
 const int vWidth = 650;    // Viewport width in pixels
 const int vHeight = 500;    // Viewport height in pixels
@@ -167,7 +166,6 @@ void keyboard(unsigned char key, int x, int y);
 void functionKeys(int key, int x, int y);
 void animationHandler(int param);
 void animationDuckFlip(int param);
-void shootingDuck(int param);
 void animationBullet(int param);
 void drawDuck();
 void drawBody();
@@ -176,99 +174,13 @@ void drawGun();
 void drawBullet();
 void drawWaterWave();
 
-///////////////prof codeeeeeeeeeeeeeeeeeeeeeeee
-//void initGL();
-//void InitGLEW();
-//bool initGLSL();
-//int  initGLUT(int argc, char** argv);
 bool initGlobalVariables();
-//void clearSharedMem();
-//void initLights();
-//void setCamera(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
-//void animationHandler(int param);
-//void toPerspective();
-//GLuint loadTexture(const char* fileName, bool wrap = true);
-
-//blinn shading with texture =============================
-const char* vsSource = R"(
-// GLSL version
-#version 110
-// uniforms
-uniform mat4 matrixModelView;
-uniform mat4 matrixNormal;
-uniform mat4 matrixModelViewProjection;
-// vertex attribs (input)
-attribute vec3 vertexPosition;
-attribute vec3 vertexNormal;
-
-// varyings (output)
-varying vec3 esVertex, esNormal;
-
-void main()
-{
-    esVertex = vec3(matrixModelView * vec4(vertexPosition, 1.0));
-    esNormal = vec3(matrixNormal * vec4(vertexNormal, 1.0));
-    gl_Position = matrixModelViewProjection * vec4(vertexPosition, 1.0);
-}
-)";
-
-const char* fsSource = R"(
-// GLSL version
-#version 110
-// uniforms
-uniform vec4 lightPosition;             // should be in the eye space
-uniform vec4 lightAmbient;              // light ambient color
-uniform vec4 lightDiffuse;              // light diffuse color
-uniform vec4 lightSpecular;             // light specular color
-uniform vec4 materialAmbient;           // material ambient color
-uniform vec4 materialDiffuse;           // material diffuse color
-uniform vec4 materialSpecular;          // material specular color
-uniform float materialShininess;        // material specular shininess
-
-
-// varyings
-varying vec3 esVertex, esNormal;
-void main()
-{
-    vec3 normal = normalize(esNormal);
-    vec3 light;
-    if(lightPosition.w == 0.0)
-    {
-        light = normalize(lightPosition.xyz);
-    }
-    else
-    {
-        light = normalize(lightPosition.xyz - esVertex);
-    }
-    vec3 view = normalize(-esVertex);
-    vec3 halfv = normalize(light + view);
-
-    vec3 color = lightAmbient.rgb * materialAmbient.rgb;        // begin with ambient
-    float dotNL = max(dot(normal, light), 0.0);
-    color += lightDiffuse.rgb * materialDiffuse.rgb * dotNL;    // add diffuse
-                  // modulate texture map
-    float dotNH = max(dot(normal, halfv), 0.0);
-    color += pow(dotNH, materialShininess) * lightSpecular.rgb * materialSpecular.rgb; // add specular
-
-    // set frag color
-    gl_FragColor = vec4(color, materialDiffuse.a);
-}
-)";
 
 /////////////////////////////////////////////////////////////////////////////////
 //// Initialize global variables
 /////////////////////////////////////////////////////////////////////////////////
 bool initGlobalVariables()
 {
-
-	//// Set up ground quad mesh
-	//Vector3 origin = Vector3(-16.0f, -3.0f, 16.0f);
-	//Vector3 dir1v = Vector3(1.0f, 0.0f, 0.0f);
-	//Vector3 dir2v = Vector3(0.0f, 0.0f, -1.0f);
-	//groundMesh = new QuadMesh(meshSize, 32.0);
-	//groundMesh->InitMesh(meshSize, origin, 32.0, 32.0, dir1v, dir2v);
-
-
 	Vector3 ambient = Vector3(0.0f, 0.05f, 0.0f);
 	Vector3 diffuse = Vector3(0.4f, 0.8f, 0.4f);
 	Vector3 specular = Vector3(0.04f, 0.04f, 0.04f);
@@ -298,24 +210,6 @@ bool initGlobalVariables()
 
 	return true;
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-// clean up global vars
-///////////////////////////////////////////////////////////////////////////////
-//void clearSharedMem()
-//{
-//	// clean up VBOs
-//	if (vboSupported)
-//	{
-//		glDeleteBuffers(1, &vboId1);
-//		glDeleteBuffers(1, &iboId1);
-//		glDeleteBuffers(1, &vboId2);
-//		glDeleteBuffers(1, &iboId2);
-//		vboId1 = iboId1 = 0;
-//		vboId2 = iboId2 = 0;
-//	}
-//}
 
 // this was chatgpt as we were supposed to use for requirement 8
 void drawWaterWave() {
@@ -468,7 +362,6 @@ void initOpenGL(int w, int h)
 
 }
 
-
 // Callback, called whenever GLUT determines that the window should be redisplayed
 // or glutPostRedisplay() has been called.
 void display(void)
@@ -479,12 +372,6 @@ void display(void)
 	// Create Viewing Matrix V
 	// Set up the camera at position (0, 6, 22) looking at the origin, up along positive y axis
 	gluLookAt(cameraX, cameraY, cameraZ, 0.0, 0.0, 0, 0.0, 1.0, 0.0); // M = IV
-
-	// Draw duck
-	// Apply modelling transformations M to move duck
-	// ModelView matrix is set to IV, where I is identity matrix
-	// M = IV
-	//drawBooth();
 
 	//**************************************************************************************** prof booth
 	// Draw Booth 
@@ -531,26 +418,6 @@ void display(void)
 		glPopMatrix();
 	}
 
-	//glPushMatrix();
-	//glTranslatef(duckPosX, duckPosY, 0);
-	//glTranslatef(0, -2, 0);
-	//glRotatef(duckAngle, 0.0, 0.0, -1.0);
-	//glTranslatef(0, 2, 0);
-
-
-	/*
-	not needed until requirement 5 - GUNS ABLAZINGGGGGGGGGGGG
-
-	//for flipping duck
-	glPushMatrix();
-	glRotatef(duckAngle2, -1.0, 0.0, 0);
-	drawBody();
-	glPopMatrix();
-    */
-	//drawBody(); // this drawBody() got moved from above because it usually sits in the flipper
-	//glPopMatrix();
-
-
 	// draw gun
 	glPushMatrix();
 	glTranslatef(gunPosX, gunPosY, 15); // this will be done last
@@ -559,29 +426,15 @@ void display(void)
 	glTranslatef(0.0, 0, -15);
 	drawGun();
 
-		// draw bullet
-		glPushMatrix();
-		// bullet relative to gun
-		//if (!bulletFlying) {
-		//	glTranslatef(0.0, 0.0, 2.0); // tip of barrel
-		//}
-		//else {
-		glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
-		//}
-		drawBullet();
-		glPopMatrix();
+	// draw bullet
+	glPushMatrix();
+	glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
+	drawBullet();
+	glPopMatrix();
 
 	glPopMatrix();
 
-	// draw bullet
-	/*glPushMatrix();
-	glTranslatef(bulletPosX, bulletPosY, bulletPosZ);
-	drawBullet();
-	glPopMatrix();*/
-
-	//drawBullet();
 	glutTimerFunc(10, animationHandler, 0);
-	//shootingDuck(0);
 
 	// draw water wave
 	glPushMatrix();
@@ -602,7 +455,7 @@ void drawDuck()
 {
 	glPushMatrix(); // copy M = IV and push onto the stack
 
-	glScalef(1.0,1.0,1.0);
+	glScalef(1.0, 1.0, 1.0);
 	drawBooth();
 
 	glPopMatrix();
@@ -675,22 +528,14 @@ void drawBody()
 
 void drawBullet()
 {
-	// Set duck material properties per body part. Can have seperate material properties for each part
+	// Set bullet material properties per body part. Can have seperate material properties for each part
 	glMaterialfv(GL_FRONT, GL_AMBIENT, bullet_mat_ambient);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, bullet_mat_specular);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, bullet_mat_diffuse);
 	glMaterialfv(GL_FRONT, GL_SHININESS, bullet_mat_shininess);
 
 	glPushMatrix();
-	// Position head with respect to its parent part (the body)
-	//glTranslatef(2, 0.5 * bodyRadius + 0.5 * headRadius, 0); // this will be done last
-
-	// "Build" Head (i.e. scale it and draw it)
-	//glPushMatrix();
-	//glScalef(headRadius, headRadius, headRadius);
 	glutSolidSphere(bulletRadius, 20, 20);
-	//glPopMatrix();
-
 	glPopMatrix();
 }
 
@@ -753,30 +598,27 @@ void drawGun()
 	gluQuadricDrawStyle(myNozzle, GLU_FILL);
 
 	glPushMatrix();
-	//glTranslatef(0.0, gunPosY, 15); // this will be done last
-	
+
 	// the main gun part thingy
 	glPushMatrix();
-	//glTranslatef(0, 0, 0);
 	glScalef(gunLength * 0.3, gunLength * 0.3, gunLength);
-	//glRotatef(0.0, 0.0, 0.0, 0.0);
 	glutSolidCube(1.0);
 
-		// the handle
-		glPushMatrix();
-		glTranslatef(0, -0.75, 0.35);
-		glScalef(gunLength * 0.2, gunLength * 0.5, gunLength * 0.06);
-		glRotatef(0.0, 0.0, 0.0, 0.0);
-		glutSolidCube(1.0);
-		glPopMatrix();
+	// the handle
+	glPushMatrix();
+	glTranslatef(0, -0.75, 0.35);
+	glScalef(gunLength * 0.2, gunLength * 0.5, gunLength * 0.06);
+	glRotatef(0.0, 0.0, 0.0, 0.0);
+	glutSolidCube(1.0);
+	glPopMatrix();
 
-		// the nozzle/end thingy
-		glPushMatrix();
-		glTranslatef(0, 0.0, -0.7);
-		glScalef(gunLength * 0.2, gunLength * 0.2, gunLength * 0.2);
-		glRotatef(0.0, 0.0, 0.0, 0.0);
-		gluCylinder(myNozzle, 0.45, 0.45, 0.25, 50, 50);
-		glPopMatrix();
+	// the nozzle/end thingy
+	glPushMatrix();
+	glTranslatef(0, 0.0, -0.7);
+	glScalef(gunLength * 0.2, gunLength * 0.2, gunLength * 0.2);
+	glRotatef(0.0, 0.0, 0.0, 0.0);
+	gluCylinder(myNozzle, 0.45, 0.45, 0.25, 50, 50);
+	glPopMatrix();
 
 
 	glPopMatrix();
@@ -818,8 +660,6 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 		bulletFlying = true;
-		//bulletPosX = gunAngle;
-		//bulletPosY = gunPosY;
 		break;
 	}
 	glutPostRedisplay();  // Trigger a window redisplay
@@ -831,16 +671,10 @@ void animationHandler(int param)
 
 	if (bulletFlying == true) {
 		bulletPosZ += -0.0004f;
-		//bulletPosX += gunAngle * 0.000004f;
-		//printf("bulletPosZ a: %f\n", bulletPosZ);	
 	}
 	if (bulletPosZ <= -20.0f || bulletFlying == false) {
 		bulletFlying = false;
 		bulletPosZ = 0.0f;
-		//bulletPosY = gunPosY;
-		//bulletPosX = gunAngle;
-		//printf("bulletPosX: %f\n", bulletPosX);
-		//printf("bulletPosY: %f\n\n", bulletPosY);
 	}
 
 	// animate each duck in array
@@ -856,16 +690,7 @@ void animationHandler(int param)
 				gunPosY > ducks[i].y - 2.0f && gunPosY < ducks[i].y + 2.0f) {
 				// hit duck
 				ducks[i].duckFlipAngle = 90.0f;
-				//print the coordinates of the duck that has just been shot
-				printf("HIT DUCK %d!\n", i);
-				printf("duckPosX: %f\n", ducks[i].x);
-				printf("duckPosY: %f\n", ducks[i].y);
-				printf("bulletPosZ: %f\n", bulletPosZ);
-				printf("gunAngle: %f\n", gunAngle);
-				printf("gunPosY: %f\n", gunPosY);
-				printf("gunPosX: %f\n\n", gunPosX);
 				score += 1;
-				printf("SCORE: %d\n\n", score);
 				bulletPosZ = 0.0f; // reset bullet
 				bulletFlying = false;
 			}
@@ -888,46 +713,9 @@ void animationHandler(int param)
 			ducks[i].y = 0;
 		}
 	}
-
-	//// animate the duck left to right in a sine wave
-	//if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f) {
-	//	duckAngle = 0.0f;
-	//	duckPosY = amplitude * sin(frequency * duckPosX);
-	//	duckPosX += 0.00004;
-	//}
-	//// rotate duck down
-	//else if (duckPosX >= 7.0f && duckAngle < 180.0f) {
-	//	duckAngle += 0.0005;
-	//	duckPosY = 0;
-	//}
-	//// animate the duck right to left
-	//else if (duckAngle >= 180.0f && duckPosX > -7.0f) {
-	//	duckAngle = 180.0f;
-	//	duckAngle2 = 0.0f;
-	//	duckPosX -= 0.0009;
-	//	duckPosY = 0;
-	//}
-	//// rotate the duck back up
-	//else if (duckPosX <= -7.0f && duckAngle < 360.0f) {
-	//	duckAngle += 0.0005;
-	//	duckPosY = 0;
-	//}
 	glutPostRedisplay();
 	glutTimerFunc(10, animationHandler, 0);
 }
-
-// when f/F is pressed, flip the duck
-//void animationDuckFlip(int param)
-//{
-//	if ((duckAngle == 0.0f || duckAngle >= 360.0f) && duckPosX < 7.0f && duckAngle2 <= 90) {
-//		duckAngle2 += 9;
-//		glutTimerFunc(35, animationDuckFlip, 0);
-//	}
-//	else {
-//		duckAngle2 = 90.0f;
-//	}
-//	glutPostRedisplay();
-//}
 
 void animationDuckFlip(int param)
 {
@@ -946,59 +734,13 @@ void animationBullet(int param)
 	if (bulletPosZ >= -20) {
 		bulletPosZ -= 1;
 		bulletPosX += gunAngle;
-		//printf("bulletPosZ: %f\n", bulletPosZ);
-		//printf("gunAngle: %f\n", gunAngle);
-		//printf("gunPosY: %f\n\n", gunPosY);
 		glutTimerFunc(10, animationBullet, 0);
 	}
 	else {
-		// bullet went too far (missed)
+		// bullet went too far
 		bulletPosZ = 0.0;
-		//bulletPosX = gunAngle;
 	}
 	glutPostRedisplay();
-}
-
-void shootingDuck(int param)
-{
-	//if (bulletPosZ < -20) {
-	//	bulletPosZ = 0.0;
-	//	//glutTimerFunc(35, animationDuckFlip, 0);
-	//}
-
-	// for each duck in the array of ducks, see if the bullet hit
-	// the bullet's coordinates are bulletPosX, bulletPosY, bulletPosZ
-	// see if that point is within 1 unit of any duck's position
-	//if (bulletPosZ <= 0.0f) {
-	//	for (int i = 0; i < flockSize; i++) {
-	//		if (ducks[i].y > 0) { // only check for ducks that are flying
-	//			float dx = gunAngle - ducks[i].x;
-	//			float dy = gunPosY - ducks[i].y;
-	//			float dz = bulletPosZ - 0.0f; // duck z position is 0
-	//			float distance = sqrt(dx * dx + dy * dy + dz * dz);
-	//			if (distance < 1.5f) { // hit if within 1.5 units
-	//				printf("HIT DUCK %d!\n", i);
-	//				ducks[i].duckFlipAngle = 90.0f;
-	//				bulletPosZ = 0.0f; // reset bullet
-	//				break;
-	//			}
-	//		}
-	//	}
-	//}
-
-	for (int i = 0; i < flockSize; i++) {
-		if (ducks[i].y > 0 && bulletPosZ > -16 && bulletPosZ < -14 && 
-			gunAngle > ducks[i].x - 1 && gunAngle < ducks[i].x + 1) {
-			printf("HIT DUCK %d!\n", i );
-			printf("duckPosX: %f\n", ducks[i].x);
-			printf("duckPosY: %f\n", ducks[i].y);
-			printf("bulletPosZ: %f\n", bulletPosZ);
-			printf("gunAngle: %f\n", gunAngle);
-			printf("gunPosY: %f\n\n", gunPosY);
-			ducks[i].duckFlipAngle = 90.0f;
-			bulletPosZ = 0.0;
-		}
-	}
 }
 
 // Callback, handles input from the keyboard, function and arrow keys
@@ -1045,73 +787,27 @@ void mouse(int button, int state, int x, int y)
 	glutPostRedisplay();   // Trigger a window redisplay
 }
 
-//float mX = vWidth / 2;
-//float mY = vHeight / 2;
-//// Mouse motion callback - use only if you want to 
-//void mouseMotionHandler(int xMouse, int yMouse)
-//{
-//	if (currentButton == GLUT_LEFT_BUTTON)
-//	{
-//		//
-//		if (xMouse > mX && cameraX < 10.0) {
-//			cameraX += 0.5;
-//			mX = xMouse;
-//		}
-//		if (xMouse < mX && cameraX > -10.0) {
-//			cameraX -= 0.5;
-//			mX = xMouse;
-//		}
-//	}
-//	if (currentButton == GLUT_RIGHT_BUTTON)
-//	{
-//		if (yMouse > mY && cameraZ < 40.0) {
-//			cameraZ += 0.5;
-//			mY = yMouse;
-//		}
-//		if (yMouse < mY && cameraZ > 10.0) {
-//			cameraZ -= 0.5;
-//			mY = yMouse;
-//		}
-//	}
-//
-//	glutPostRedisplay();   // Trigger a window redisplay
-//}
-
 float mX = vWidth / 2;
 float mY = vHeight / 2;
 // Mouse motion callback - use only if you want to 
 void mouseMotionHandler(int xMouse, int yMouse)
 {
-	//if (currentButton == GLUT_LEFT_BUTTON)
-	//{
-		//
-		if (xMouse < mX && gunAngle > -14) {
-			gunAngle -= 0.25;
-			mX = xMouse;
-		}
-		if (xMouse > mX && gunAngle < 14) {
-			gunAngle += 0.25;
-			mX = xMouse;
-		}
-	//}
-	//if (currentButton == GLUT_RIGHT_BUTTON)
-	//{
-		if (yMouse < mY && gunPosY < 6.0) {
-			gunPosY += 0.1;
-			mY = yMouse;
-			//printf("gunPosY: %f\n", gunPosY);
-		}
-		if (yMouse > mY && gunPosY > -2.0) {
-			gunPosY -= 0.1;
-			mY = yMouse;
-		}
-		printf("gunPosX: %f\n", gunPosX);
-		printf("gunAngle: %f\nxMouse: %d\n", gunAngle, xMouse);
-		printf("gunPosY: %f\nyMouse: %d\n\n", gunPosY, yMouse);
-		//printf("gunPosX: %f\n", gunPosX);
-	
-		//}
-	//printf("yMouse: %f\n", yMouse);
+	if (xMouse < mX && gunAngle > -14) {
+		gunAngle -= 0.25;
+		mX = xMouse;
+	}
+	if (xMouse > mX && gunAngle < 14) {
+		gunAngle += 0.25;
+		mX = xMouse;
+	}
+	if (yMouse < mY && gunPosY < 6.0) {
+		gunPosY += 0.1;
+		mY = yMouse;
+	}
+	if (yMouse > mY && gunPosY > -2.0) {
+		gunPosY -= 0.1;
+		mY = yMouse;
+	}
 
 	glutPostRedisplay();   // Trigger a window redisplay
 }
