@@ -166,7 +166,6 @@ void keyboard(unsigned char key, int x, int y);
 void functionKeys(int key, int x, int y);
 void animationHandler(int param);
 void animationDuckFlip(int param);
-void animationBullet(int param);
 void drawDuck();
 void drawBody();
 void drawBooth();
@@ -211,7 +210,7 @@ bool initGlobalVariables()
 	return true;
 }
 
-// this was chatgpt as we were supposed to use for requirement 8
+// this was chatgpt as we were supposed to use for requirement 8 of a1
 void drawWaterWave() {
 	// Save current OpenGL color and lighting state
 	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT);
@@ -653,12 +652,9 @@ void keyboard(unsigned char key, int x, int y)
 	switch (key)
 	{
 	case 'f':
-		glutTimerFunc(10, animationDuckFlip, 0);
+		bulletFlying = true;
 		break;
 	case 'F':
-		duckAngle2 += 2.0;
-		break;
-	case 'a':
 		bulletFlying = true;
 		break;
 	}
@@ -729,19 +725,6 @@ void animationDuckFlip(int param)
 	glutPostRedisplay();
 }
 
-void animationBullet(int param)
-{
-	if (bulletPosZ >= -20) {
-		bulletPosZ -= 1;
-		bulletPosX += gunAngle;
-		glutTimerFunc(10, animationBullet, 0);
-	}
-	else {
-		// bullet went too far
-		bulletPosZ = 0.0;
-	}
-	glutPostRedisplay();
-}
 
 // Callback, handles input from the keyboard, function and arrow keys
 void functionKeys(int key, int x, int y)
